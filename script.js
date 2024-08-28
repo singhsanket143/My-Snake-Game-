@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setInterval(() => {
             updateSnake();
             drawFoodAndSnake();
-        }, 200);
+        }, 150);
     }
 
     function runGame() {
