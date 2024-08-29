@@ -11,18 +11,55 @@ document.addEventListener('DOMContentLoaded', function () {
     let dx = cellSize; // +20
     let dy = 0;
 
-    function updateSnake() {
-        const newHead = { x: snake[0].x + dx, y: snake[0].y + dy };
-        snake.unshift(newHead); // Add new head to the snake
+    let intervalId = null;
 
+    function endGame(){
+        clearInterval(intervalId);
+        intervalId = null;
+        gameStarted = false;
+    }
+
+    function generateRandomLocation(){
+        let x_cor = Math.floor(Math.random()*30)*20;
+        let y_cor = Math.floor(Math.random()*30)*20;
+        return {x: x_cor, y: y_cor};
+    }
+    function updateFoodLocation(){
+        let newLocation = generateRandomLocation();
+        while(snake.includes(newLocation)){
+            newLocation = generateRandomLocation();
+        }
+        food = newLocation;
+    }
+
+    function searchInSnake(position){
+        for(let i=0; i<snake.length; i++){
+            if(snake[i].x===position.x && snake[i].y===position.y) return true;
+        }
+        return false;
+    }
+
+    function updateSnake() {
+        let newHead = { x: snake[0].x + dx, y: snake[0].y + dy };
+        
         // check collision with food
         if(newHead.x === food.x && newHead.y === food.y) {
             score += 10;
             // TODO: move food
-
-        } else {
-            snake.pop(); // Remove tail
+            updateFoodLocation();
+            snake.unshift(newHead); // Add new head to the snake
         }
+        //check collision with snake-itself or collision with boundry 
+        else if(searchInSnake(newHead) || newHead.x<0 || newHead.x>=600 || newHead.y<0 || newHead.y>=600){
+            //end the Game
+            endGame();
+        }
+        
+        else {
+            snake.pop(); // Remove tail
+            snake.unshift(newHead); // Add new head to the snake
+        }
+        
     }
 
     function changeDirection(e) {
@@ -66,11 +103,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const foodElement = drawDiv(food.x, food.y, 'food');
         gameArena.appendChild(foodElement);
     }
-
+    function updateScoreBoard(){
+        scoreBoard = document.getElementById('score-board')
+        scoreBoard.innerHTML=`Score : ${score}`;
+    }
     function gameLoop() {
-        setInterval(() => {
+        intervalId = setInterval(() => {
             updateSnake();
             drawFoodAndSnake();
+            updateScoreBoard();
         }, 150);
     }
 
